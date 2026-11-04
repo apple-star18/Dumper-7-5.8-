@@ -404,8 +404,13 @@ void Off::Init()
 
 		Off::FFieldClass::CastFlags = OffsetFinder::FindFieldClassCastFlagsOffset();
 		OffsetFinder::FixupFieldClassOffsets();
-
 		std::cerr << std::format("Off::FFieldClass::CastFlags: 0x{:X}\n\n", Off::FFieldClass::CastFlags);
+
+		auto IntegerClass = ObjectArray::FindStructFast("Guid").GetChildProperties().GetClass();
+		auto ByteClass = ObjectArray::FindStructFast("Color").GetChildProperties().GetClass();
+		Off::FFieldClass::Name = OffsetFinder::FindFieldClassNameOffset(IntegerClass.GetAddress(), ByteClass.GetAddress());
+		if (Off::FFieldClass::Name != OffsetFinder::OffsetNotFound)
+			std::cerr << std::format("Off::FFieldClass::Name: 0x{:X}\n", Off::FFieldClass::Name);
 	}
 
 	Off::UStruct::StructBaseChain = OffsetFinder::FindStructBaseChainOffset();

@@ -419,3 +419,24 @@ void* FName::DEBUGGetAppendString()
 {
 	return (void*)(AppendString);
 }
+
+bool FName::TryReadNameForOffsetProbe(const void* Candidate, std::wstring& Result)
+{
+	Result.clear();
+
+	if (!Candidate || !ToStr)
+		return false;
+
+	uint32 ComparisonIndex = 0;
+	SIZE_T Bytes = 0;
+	if (!ReadProcessMemory(GetCurrentProcess(), static_cast<const uint8*>(Candidate) + Off::FName::CompIdx,
+		&ComparisonIndex, sizeof(ComparisonIndex), &Bytes) || Bytes != sizeof(ComparisonIndex))
+		return false;
+
+	if (ComparisonIndex == 0 || ComparisonIndex >= 0x4000000)
+		return false;
+
+	Result = ToStr(Candidate);
+	
+	return true;
+}

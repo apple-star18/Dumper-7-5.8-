@@ -662,6 +662,29 @@ int32_t OffsetFinder::FindFieldClassCastFlagsOffset()
 	return Offset != OffsetNotFound ? Offset : 0x10;
 }
 
+int32_t OffsetFinder::FindFieldClassNameOffset(const void* IntegerClass, const void* ByteClass)
+{
+	if (!IntegerClass || !ByteClass || IntegerClass == ByteClass)
+		return OffsetNotFound;
+
+	int32 Found = OffsetNotFound;
+	for (int32 Offset = 0; Offset <= 0x40; Offset += 4)
+	{
+		std::wstring IntegerName;
+		std::wstring ByteName;
+		if (!FName::TryReadNameForOffsetProbe(static_cast<const uint8*>(IntegerClass) + Offset, IntegerName)
+			|| IntegerName != L"IntProperty"
+			|| !FName::TryReadNameForOffsetProbe(static_cast<const uint8*>(ByteClass) + Offset, ByteName)
+			|| ByteName != L"ByteProperty")
+			continue;
+		// Refuse an ambiguous layout rather than guessing a field position.
+		if (Found != OffsetNotFound) return OffsetNotFound;
+		Found = Offset;
+	}
+
+	return Found;
+}
+
 void OffsetFinder::FixupFieldClassOffsets()
 {
 	/*

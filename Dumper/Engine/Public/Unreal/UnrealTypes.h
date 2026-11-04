@@ -125,4 +125,6 @@ public:
 	static std::string CompIdxToString(int CmpIdx);
 
 	static void* DEBUGGetAppendString();
+
+	static bool TryReadNameForOffsetProbe(const void* Address, std::wstring& Result);
 };
